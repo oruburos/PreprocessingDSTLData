@@ -3,10 +3,13 @@ from sqlalchemy import create_engine
 import json
 import ValuesExperiment
 
-mysqlServer ='mysql+pymysql://root:@localhost:3308/dstlProlific'
+#mysqlServer ='mysql+pymysql://root:@localhost:3308/dstlProlific'
+mysqlServer ='mysql+pymysql://root:@localhost:3308/dstl'
 engine = create_engine(mysqlServer)
 
-usersprolific = pd.read_sql_query('SELECT * FROM usersprolific where completed = 1 ', engine)
+#usersprolific = pd.read_sql_query('SELECT * FROM usersprolific where completed = 1 ', engine)
+usersprolific = pd.read_sql_query('SELECT * FROM usersprolific', engine)
+
 pd.set_option("display.max_colwidth", None)
 
 #special cases
@@ -46,6 +49,6 @@ usersprolific[ keysv2] = usersprolific['category_colour_association'].apply( cat
 usersprolific['order_trials_12'] = usersprolific['shortMonitoringTask'].apply( concatenateTrials)
 usersprolific['order_trials_24'] = usersprolific['longMonitoringTask'].apply( concatenateTrials)
 usersprolific = usersprolific.drop(['session_id','category_colour_association','colours', 'longMonitoringTask' ,'shortMonitoringTask'  ,  'PENDING' ], axis=1)
-usersprolific.to_sql('users_prolific_expandedv5',con= engine ,if_exists ='append' , index= False)
+usersprolific.to_sql('users_prolific_expanded',con= engine ,if_exists ='append' , index= False)
 
 print(usersprolific )

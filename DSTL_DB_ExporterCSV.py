@@ -14,14 +14,16 @@ mysqlServer ='mysql+pymysql://root:@localhost:3308/dstl'
 '''
 
 # mysqlServer ='mysql+pymysql://'+username+':'+password+'@'+host+'/'+dbname
-mysqlServer = 'mysql+pymysql://root:@localhost:3308/dstlProlific'
+#mysqlServer = 'mysql+pymysql://root:@localhost:3308/dstlProlific'
+mysqlServer = 'mysql+pymysql://root:@localhost:3308/dstl'
 
 engine = create_engine(mysqlServer)
 
 
 
 '''SECTION FOR USERSPROLIFIC'''
-usersprolific = pd.read_sql_query('SELECT * FROM usersprolific where completed = 1 ', engine)
+#usersprolific = pd.read_sql_query('SELECT * FROM usersprolific where completed = 1 ', engine)
+usersprolific = pd.read_sql_query('SELECT * FROM usersprolific', engine)
 pd.set_option("display.max_colwidth", None)
 
 #special cases
@@ -36,7 +38,7 @@ def categories_color_relationship( cats):
         if colorForCategory:
             trialsAcostado.append(colorForCategory)
         else:
-            trialsAcostado.append('N/A')
+            trialsAcostado.append('NA')
 
     return pd.Series(trialsAcostado)
 
@@ -74,11 +76,11 @@ def parseCategoryLearning(replay):
     #  print(replay)
     categoryLearningTrials = json.loads(replay['replay'])
 
-    print(" trials category learning " + str(len(categoryLearningTrials)))
-    #   print(categoryLearningTrials)
+   # print(" trials category learning " + str(len(categoryLearningTrials)))
+   # print(categoryLearningTrials)
     # print(len(categoryLearningTrials.keys()))
     for trial in categoryLearningTrials:
-        info = categoryLearningTrials[trial][0]['completeTrial']
+        info = categoryLearningTrials[trial][0]['complete_category_learning_trial']
         dict = {}
         dict['id_participant'] = replay['id'];
         for column in arrayColumns:
@@ -86,7 +88,10 @@ def parseCategoryLearning(replay):
                 #print("Sutituyendo complete trial")
                 dict[column] = "complete_category_learning_trial";
             else:
-                dict[column] = info[column];
+                if info[column]=='N/A':
+                    dict[column] = 'NA';
+                else:
+                    dict[column] = info[column];
 
         dict['trained'] = replay['trained'];
         rows_list.append(dict)
@@ -111,7 +116,7 @@ tablePractice = pd.read_sql_query('SELECT * FROM participantpractice', engine)
 
 arrayColumns2 = [
     "type",
-    "practice_trial",
+    "practice_trial",#complete_practice_trial
     "condition_experiment",
     "tick",
     "completed_by",
@@ -142,6 +147,8 @@ def parsePractice(replay):
     practiceTrials = json.loads(replay['replay'])
 
     print(" trials practice " + str(len(practiceTrials)))
+
+    print(" trials practice " + str(practiceTrials))
     for trial in practiceTrials:
         info = practiceTrials[trial][0]['complete_practice_trial']
         dict = {}
@@ -150,8 +157,8 @@ def parsePractice(replay):
             if str(column) == "current_position_entity_selected":
                 pos = info[column]
                 if pos == "N/A":
-                    dict["current_position_entity_selected_x"] = "N/A"
-                    dict["current_position_entity_selected_y"] = "N/A"
+                    dict["current_position_entity_selected_x"] = "NA"
+                    dict["current_position_entity_selected_y"] = "NA"
                 else:
 
                     dict["current_position_entity_selected_x"] = pos['x']
@@ -159,8 +166,8 @@ def parsePractice(replay):
             elif str(column) == "current_position_entity_changed":
                 pos = info[column]
                 if pos == "N/A":
-                    dict["current_position_entity_changed_x"] = "N/A"
-                    dict["current_position_entity_changed_y"] = "N/A"
+                    dict["current_position_entity_changed_x"] = "NA"
+                    dict["current_position_entity_changed_y"] = "NA"
                 else:
 
                     dict["current_position_entity_changed_x"] = pos['x']
@@ -179,8 +186,11 @@ def parsePractice(replay):
                 dict["UNCERTAIN_FRIEND_entities"] = pos['UNCERTAIN_FRIEND']
                 dict["UNCERTAIN_HOSTILE_y"] = pos['UNCERTAIN_HOSTILE']
             else:
+                if info[column]=='N/A':
+                    dict[column] = 'NA';
+                else:
+                    dict[column] = info[column];
 
-                dict[column] = info[column];
         rows_list_practice.append(dict)
 
 
@@ -244,16 +254,16 @@ def parsePerformanceFirstRound(replay):
             if str(column) == "current_position_entity_selected":
                 pos = info[column]
                 if pos == "N/A":
-                    dict["current_position_entity_selected_x"] = "N/A"
-                    dict["current_position_entity_selected_y"] = "N/A"
+                    dict["current_position_entity_selected_x"] = "NA"
+                    dict["current_position_entity_selected_y"] = "NA"
                 else:
                     dict["current_position_entity_selected_x"] = pos['x']
                     dict["current_position_entity_selected_y"] = pos['y']
             elif str(column) == "current_position_entity_changed":
                 pos = info[column]
                 if pos == "N/A":
-                    dict["current_position_entity_changed_x"] = "N/A"
-                    dict["current_position_entity_changed_y"] = "N/A"
+                    dict["current_position_entity_changed_x"] = "NA"
+                    dict["current_position_entity_changed_y"] = "NA"
                 else:
                     dict["current_position_entity_changed_x"] = pos['x']
                     dict["current_position_entity_changed_y"] = pos['y']
@@ -280,7 +290,10 @@ def parsePerformanceFirstRound(replay):
                 dict['UNCERTAIN_FRIEND_entities'] = pos['UNCERTAIN_FRIEND']
                 dict['UNCERTAIN_HOSTILE_y'] = pos['UNCERTAIN_HOSTILE']
             else:
-                dict[column] = info[column];
+                if info[column] == 'N/A':
+                    dict[column] = 'NA';
+                else:
+                    dict[column] = info[column];
         rows_list_performance.append(dict)
 
 
@@ -316,8 +329,8 @@ def parsePerformanceSecondRound(replay):
                 pos = info[column]
 
                 if pos == "N/A":
-                    dict["current_position_entity_selected_x"] = "N/A"
-                    dict["current_position_entity_selected_y"] = "N/A"
+                    dict["current_position_entity_selected_x"] = "NA"
+                    dict["current_position_entity_selected_y"] = "NA"
                 else:
 
                     dict["current_position_entity_selected_x"] = pos['x']
@@ -327,8 +340,8 @@ def parsePerformanceSecondRound(replay):
                 pos = info[column]
 
                 if pos == "N/A":
-                    dict["current_position_entity_changed_x"] = "N/A"
-                    dict["current_position_entity_changed_y"] = "N/A"
+                    dict["current_position_entity_changed_x"] = "NA"
+                    dict["current_position_entity_changed_y"] = "NA"
                 else:
 
                     dict["current_position_entity_changed_x"] = pos['x']
@@ -357,7 +370,10 @@ def parsePerformanceSecondRound(replay):
                 dict["UNCERTAIN_HOSTILE_y"] = pos['UNCERTAIN_HOSTILE']
             else:
 
-                dict[column] = info[column];
+                if info[column] == 'N/A':
+                    dict[column] = 'NA';
+                else:
+                    dict[column] = info[column];
         rows_list_performance2ndRound.append(dict)
 
 
@@ -391,9 +407,9 @@ total = pd.concat(trials);
 
 
 
-total.to_sql('experiment',con= engine ,if_exists ='append' , index= False)
+total.to_sql('experimentNA',con= engine ,if_exists ='append' , index= False)
 
-total.to_csv("CompleteTrials.csv", index=False);
+#total.to_csv("CompleteTrialsNA.csv", index=False);
 
 
 
