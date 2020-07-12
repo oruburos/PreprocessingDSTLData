@@ -15,7 +15,7 @@ mysqlServer ='mysql+pymysql://root:@localhost:3308/dstl'
 
 # mysqlServer ='mysql+pymysql://'+username+':'+password+'@'+host+'/'+dbname
 #mysqlServer = 'mysql+pymysql://root:@localhost:3308/dstlProlific'
-mysqlServer = 'mysql+pymysql://root:@localhost:3308/dstl'
+mysqlServer = 'mysql+pymysql://root:@localhost:3308/dstl_exp1'
 
 engine = create_engine(mysqlServer)
 
@@ -55,7 +55,7 @@ usersprolific[ keysv2] = usersprolific['category_colour_association'].apply( cat
 usersprolific['order_trials_12'] = usersprolific['shortMonitoringTask'].apply( concatenateTrials)
 usersprolific['order_trials_24'] = usersprolific['longMonitoringTask'].apply( concatenateTrials)
 usersprolificexpanded = usersprolific.drop(['session_id','category_colour_association','colours', 'longMonitoringTask' ,'shortMonitoringTask'  ,  'PENDING' ], axis=1)
-usersprolificexpanded.to_sql('users_prolific_expandedv5',con= engine ,if_exists ='append' , index= False)
+usersprolificexpanded.to_sql('users_prolific_expanded',con= engine ,if_exists ='append' , index= False)
 '''END USERSPROLIFIC'''
 
 
@@ -146,9 +146,9 @@ rows_list_practice = []
 def parsePractice(replay):
     practiceTrials = json.loads(replay['replay'])
 
-    print(" trials practice " + str(len(practiceTrials)))
+    #print(" trials practice " + str(len(practiceTrials)))
 
-    print(" trials practice " + str(practiceTrials))
+    #print(" trials practice " + str(practiceTrials))
     for trial in practiceTrials:
         info = practiceTrials[trial][0]['complete_practice_trial']
         dict = {}
@@ -173,18 +173,7 @@ def parsePractice(replay):
                     dict["current_position_entity_changed_x"] = pos['x']
                     dict["current_position_entity_changed_y"] = pos['y']
             elif str(column) == "entities_by_category":
-
-                pos = info[column]
-                dict["UNKNOWN_entities"] = pos['UNKNOWN']
-                dict["HOSTILE_entities"] = pos['HOSTILE']
-                dict["NEUTRAL_entities"] = pos['NEUTRAL']
-                dict["PENDING_entities"] = pos['PENDING']
-                dict["UNKNOWN_entities"] = pos['UNKNOWN']
-                dict["FRIEND_entities"] = pos['FRIEND']
-                dict["ASSUMED_FRIEND_entities"] = pos['ASSUMED_FRIEND']
-                dict["ASSUMED_HOSTILE_entities"] = pos['ASSUMED_HOSTILE']
-                dict["UNCERTAIN_FRIEND_entities"] = pos['UNCERTAIN_FRIEND']
-                dict["UNCERTAIN_HOSTILE_y"] = pos['UNCERTAIN_HOSTILE']
+                print("")
             else:
                 if info[column]=='N/A':
                     dict[column] = 'NA';
@@ -241,15 +230,17 @@ arrayColumnsPerformance = [
 print("columns monitoring " + str(len(arrayColumnsPerformance)))
 rows_list_performance = []
 
-
+#firstRoundWith12= False;
 def parsePerformanceFirstRound(replay):
     performanceTrials = json.loads(replay['replay'])
-    #print(" trials monitoring first round :" + str(len(performanceTrials)))
+    print(" trials monitoring first round :" + str(performanceTrials))
     for trial in performanceTrials:
         info = performanceTrials[trial][0]['complete_monitoring_trial']
         dict = {}
         dict['id_participant'] = replay['id'];
         dict['with_12_Entities'] = replay['first_round_12'];
+        dict['first_round'] = 1;
+        dict['second_round'] = 0;
         for column in arrayColumnsPerformance:
             if str(column) == "current_position_entity_selected":
                 pos = info[column]
@@ -269,26 +260,51 @@ def parsePerformanceFirstRound(replay):
                     dict["current_position_entity_changed_y"] = pos['y']
             elif str(column) == "trial_description":
                 change = info[column]
-               # print(change)
-               # print(change[0])
-                dict["from_category_id"] = change[0]
-                dict["to_category_id"] = change[1]
-
+                if change:
+                    #print(("Condition trial llena"))
+                    #print(change)
+                    #print(change[0])
+                    dict["from_category_id"] = change[0]
+                    dict["to_category_id"] = change[1]
+                else:
+                    dict["from_category_id"] = "0"
+                    dict["to_category_id"] = ""
             elif str(column) == "entities_by_category":
 
                 pos = info[column]
                 # {'UNKNOWN': 1, 'HOSTILE': 2, 'NEUTRAL': 1, 'PENDING': 0, 'FRIEND': 0, 'ASSUMED_FRIEND': 0,
                 # 'ASSUMED_HOSTILE': 0, 'UNCERTAIN_FRIEND': 0, 'UNCERTAIN_HOSTILE': 0}
-                dict['UNKNOWN_entities'] = pos['UNKNOWN']
-                dict['HOSTILE_entities'] = pos['HOSTILE']
-                dict['NEUTRAL_entities'] = pos['NEUTRAL']
-                dict['PENDING_entities'] = pos['PENDING']
-                dict['UNKNOWN_entities'] = pos['UNKNOWN']
-                dict['FRIEND_entities'] = pos['FRIEND']
-                dict['ASSUMED_FRIEND_entities'] = pos['ASSUMED_FRIEND']
-                dict['ASSUMED_HOSTILE_entities'] = pos['ASSUMED_HOSTILE']
-                dict['UNCERTAIN_FRIEND_entities'] = pos['UNCERTAIN_FRIEND']
-                dict['UNCERTAIN_HOSTILE_y'] = pos['UNCERTAIN_HOSTILE']
+                totalEntities= 0
+                dict["HOSTILE_entities"] = pos['HOSTILE']
+                totalEntities = totalEntities + int(pos['HOSTILE'])
+                dict["NEUTRAL_entities"] = pos['NEUTRAL']
+                totalEntities = totalEntities + int(pos['NEUTRAL'])
+                dict["PENDING_entities"] = pos['PENDING']
+                totalEntities = totalEntities + int(pos['PENDING'])
+                dict["UNKNOWN_entities"] = pos['UNKNOWN']
+                totalEntities = totalEntities + int(pos['UNKNOWN'])
+                dict["FRIEND_entities"] = pos['FRIEND']
+                totalEntities = totalEntities + int(pos['FRIEND'])
+                dict["ASSUMED_FRIEND_entities"] = pos['ASSUMED_FRIEND']
+                totalEntities = totalEntities + int(pos['ASSUMED_FRIEND'])
+                dict["ASSUMED_HOSTILE_entities"] = pos['ASSUMED_HOSTILE']
+                totalEntities = totalEntities + int(pos['ASSUMED_HOSTILE'])
+                dict["UNCERTAIN_FRIEND_entities"] = pos['UNCERTAIN_FRIEND']
+                totalEntities = totalEntities + int(pos['UNCERTAIN_FRIEND'])
+                dict["UNCERTAIN_HOSTILE_entities"] = pos['UNCERTAIN_HOSTILE']
+                totalEntities = totalEntities + int(pos['UNCERTAIN_HOSTILE'])
+                dict["total_entities_first_round"] = totalEntities
+
+
+               # print("Entidades por trial ", totalEntities)
+               # print("with 12 " ,dict['with_12_Entities'] )
+                if int ( dict['with_12_Entities'] ) == 1:
+                    if totalEntities is not 12:
+                        print("ERROR deben ser 12" )
+                elif int ( dict['with_12_Entities'] ) == 0:
+                    if totalEntities is not 24:
+                        print("ERROR deben ser 24" )
+
             else:
                 if info[column] == 'N/A':
                     dict[column] = 'NA';
@@ -323,6 +339,8 @@ def parsePerformanceSecondRound(replay):
         info = performance2ndRoundTrials[trial][0]['complete_monitoring_trial']
         dict = {}
         dict['id_participant'] = replay['id'];
+        dict['first_round'] = 0;
+        dict['second_round'] = 1;
         for column in arrayColumnsPerformance:
             if str(column) == "current_position_entity_selected":
 
@@ -358,16 +376,26 @@ def parsePerformanceSecondRound(replay):
                 pos = info[column]
                 # {'UNKNOWN': 1, 'HOSTILE': 2, 'NEUTRAL': 1, 'PENDING': 0, 'FRIEND': 0, 'ASSUMED_FRIEND': 0,
                 # 'ASSUMED_HOSTILE': 0, 'UNCERTAIN_FRIEND': 0, 'UNCERTAIN_HOSTILE': 0}
-                dict["UNKNOWN_entities"] = pos['UNKNOWN']
+                totalEntities = 0
                 dict["HOSTILE_entities"] = pos['HOSTILE']
+                totalEntities = totalEntities + int(pos['HOSTILE'])
                 dict["NEUTRAL_entities"] = pos['NEUTRAL']
+                totalEntities = totalEntities + int(pos['NEUTRAL'])
                 dict["PENDING_entities"] = pos['PENDING']
+                totalEntities = totalEntities + int(pos['PENDING'])
                 dict["UNKNOWN_entities"] = pos['UNKNOWN']
+                totalEntities = totalEntities + int(pos['UNKNOWN'])
                 dict["FRIEND_entities"] = pos['FRIEND']
+                totalEntities = totalEntities + int(pos['FRIEND'])
                 dict["ASSUMED_FRIEND_entities"] = pos['ASSUMED_FRIEND']
+                totalEntities = totalEntities + int(pos['ASSUMED_FRIEND'])
                 dict["ASSUMED_HOSTILE_entities"] = pos['ASSUMED_HOSTILE']
+                totalEntities = totalEntities + int(pos['ASSUMED_HOSTILE'])
                 dict["UNCERTAIN_FRIEND_entities"] = pos['UNCERTAIN_FRIEND']
-                dict["UNCERTAIN_HOSTILE_y"] = pos['UNCERTAIN_HOSTILE']
+                totalEntities = totalEntities + int(pos['UNCERTAIN_FRIEND'])
+                dict["UNCERTAIN_HOSTILE_entities"] = pos['UNCERTAIN_HOSTILE']
+                totalEntities = totalEntities + int(pos['UNCERTAIN_HOSTILE'])
+                dict["total_entities_second_round"] = totalEntities
             else:
 
                 if info[column] == 'N/A':
@@ -407,7 +435,7 @@ total = pd.concat(trials);
 
 
 
-total.to_sql('experimentNA',con= engine ,if_exists ='append' , index= False)
+total.to_sql('experiment1',con= engine ,if_exists ='append' , index= False)
 
 #total.to_csv("CompleteTrialsNA.csv", index=False);
 

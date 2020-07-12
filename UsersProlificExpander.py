@@ -4,7 +4,7 @@ import json
 import ValuesExperiment
 
 #mysqlServer ='mysql+pymysql://root:@localhost:3308/dstlProlific'
-mysqlServer ='mysql+pymysql://root:@localhost:3308/dstl'
+mysqlServer ='mysql+pymysql://root:@localhost:3308/dstl_exp1'
 engine = create_engine(mysqlServer)
 
 #usersprolific = pd.read_sql_query('SELECT * FROM usersprolific where completed = 1 ', engine)
