@@ -12,10 +12,7 @@ mysqlServer ='mysql+pymysql://root:@localhost:3308/dstl'
 '''
 '''
 
-host = "db822598633.hosting-data.io:3306";
-username   = "dbo822598633";
-password   = "QmulDstl2020@";
-dbname     = "db822598633";
+
 '''
 #mysqlServer ='mysql+pymysql://'+username+':'+password+'@'+host+'/'+dbname
 mysqlServer ='mysql+pymysql://root:@localhost:3308/dstlProlific'
