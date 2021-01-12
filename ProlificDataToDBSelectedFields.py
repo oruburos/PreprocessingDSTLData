@@ -11,12 +11,6 @@ dbname     = "dstl";
 mysqlServer ='mysql+pymysql://root:@localhost:3308/dstl'
 '''
 
-'''
-host = "db822598633.hosting-data.io:3306";
-username   = "dbo822598633";
-password   = "QmulDstl2020@";
-dbname     = "db822598633";
-'''
 
 mysqlServer ='mysql+pymysql://root:@localhost:3308/dstl_exp1'
 engine = create_engine(mysqlServer)
